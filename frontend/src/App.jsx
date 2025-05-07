@@ -1,25 +1,38 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import LoginPage from './pages/LoginPage';
-import AdminPage from './pages/AdminPage';
-import HomePage from './pages/HomePage';
-import LecturerPage from './pages/LecturerPage';
+import React, { useState, useEffect } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Sidebar from './components/Sidebar';
 
 const App = () => {
-  return (
-    <Router>
-      <Navbar />
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/admin" element={<AdminPage />} />
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/lecturer" element={<LecturerPage />} />
-      </Routes>
-      <Footer />
-    </Router>
-  );
+    const [user, setUser] = useState(null);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            const userData = JSON.parse(atob(token.split('.')[1]));
+            setUser(userData);
+        }
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        setUser(null);
+        navigate('/login');
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-100 flex">
+            {user && <Sidebar user={user} handleLogout={handleLogout} />}
+            <div className="flex-1">
+                <div className="container mx-auto p-4">
+                    <Outlet />
+                </div>
+            </div>
+            <ToastContainer position="top-right" autoClose={3000} />
+        </div>
+    );
 };
 
 export default App;

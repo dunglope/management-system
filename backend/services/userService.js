@@ -1,40 +1,87 @@
 const pool = require('../config/db');
+const bcrypt = require('bcrypt');
 
-// Lấy danh sách người dùng
-async function getAllUsers() {
-  const { rows } = await pool.query('SELECT * FROM "NguoiDung" ORDER BY user_id ASC');
-  return rows;
-}
-
-// Thêm người dùng mới
-async function createUser(user) {
-    const { username, password_hash, full_name, email, role } = user;
-    const { rows } = await pool.query(
-      'INSERT INTO "NguoiDung" (username, password_hash, full_name, email, role) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [username, password_hash, full_name, email, role]
-    );
-    return rows[0];
+const createUser = async ({ username, password, full_name, email, role }) => {
+  try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const query = `
+          INSERT INTO nguoidung (username, password, full_name, email, role)
+          VALUES ($1, $2, $3, $4, $5)
+          RETURNING user_id
+      `;
+      const values = [username, hashedPassword, full_name, email, role];
+      const result = await pool.query(query, values);
+      return result.rows[0].user_id;
+  } catch (error) {
+      if (error.code === '23505') {
+          if (error.constraint === 'nguoidung_username_key') {
+              throw new Error('Username already exists');
+          }
+          if (error.constraint === 'nguoidung_email_key') {
+              throw new Error('Email already exists');
+          }
+      }
+      throw error;
   }
+};
 
-// Cập nhật người dùng
-async function updateUser(user_id, user) {
-  const { full_name, email, role, is_active } = user;
-  const { rows } = await pool.query(
-    'UPDATE "NguoiDung" SET full_name=$1, email=$2, role=$3, is_active=$4 WHERE user_id=$5 RETURNING *',
-    [full_name, email, role, is_active, user_id]
-  );
-  return rows[0];
-}
+const findUserByUsername = async (username) => {
+  try {
+      const query = `
+          SELECT user_id, username, password, role
+          FROM nguoidung
+          WHERE username = $1
+      `;
+      const result = await pool.query(query, [username]);
+      return result.rows[0] || null;
+  } catch (error) {
+      throw error;
+  }
+};
 
-// Xóa người dùng
-async function deleteUser(user_id) {
-  await pool.query('DELETE FROM "NguoiDung" WHERE user_id=$1', [user_id]);
-  return { message: "User deleted successfully" };
-}
+
+const getUserByUsername = async (username) => {
+    const query = 'SELECT * FROM NguoiDung WHERE username = $1';
+    const result = await pool.query(query, [username]);
+    return result.rows[0];
+};
+
+const getAllUsers = async () => {
+    const query = 'SELECT * FROM NguoiDung';
+    const result = await pool.query(query);
+    return result.rows;
+};
+
+const getUserById = async (id) => {
+    const query = 'SELECT * FROM NguoiDung WHERE user_id = $1';
+    const result = await pool.query(query, [id]);
+    if (!result.rows[0]) throw new Error('User not found');
+    return result.rows[0];
+};
+
+const updateUser = async (id, { username, full_name, email }) => {
+    const query = `
+        UPDATE NguoiDung
+        SET username = $1, full_name = $2, email = $3
+        WHERE user_id = $4
+        RETURNING *;
+    `;
+    const result = await pool.query(query, [username, full_name, email, id]);
+    if (!result.rows[0]) throw new Error('User not found');
+    return result.rows[0];
+};
+
+const deleteUser = async (id) => {
+    const query = 'DELETE FROM NguoiDung WHERE user_id = $1';
+    await pool.query(query, [id]);
+};
 
 module.exports = {
-  getAllUsers,
-  createUser,
-  updateUser,
-  deleteUser
+    createUser,
+    getUserByUsername,
+    getAllUsers,
+    getUserById,
+    updateUser,
+    deleteUser,
+    findUserByUsername
 };
