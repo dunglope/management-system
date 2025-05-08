@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 
 const Sidebar = ({ user, handleLogout }) => {
     const links = [
+        { path: '/admin', label: 'Admin Dashboard', roles: ['admin'] },
         { path: '/', label: 'Dashboard', roles: ['admin', 'lecturer', 'student'] },
         { path: '/users', label: 'User Management', roles: ['admin'] },
         { path: '/curriculums', label: 'Curriculums', roles: ['admin', 'lecturer', 'student'] },
@@ -16,7 +17,7 @@ const Sidebar = ({ user, handleLogout }) => {
 
     return (
         <div className="w-64 bg-blue-800 text-white h-screen p-4">
-            <h2 className="text-xl font-bold mb-6">Student Management</h2>
+            <h2 className="text-xl font-bold mb-6">Brainrot Academy</h2>
             <p className="mb-4">Welcome, {user.username} ({user.role})</p>
             <nav>
                 {links.map((link) => (

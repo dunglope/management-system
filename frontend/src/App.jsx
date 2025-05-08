@@ -13,8 +13,11 @@ const App = () => {
         if (token) {
             const userData = JSON.parse(atob(token.split('.')[1]));
             setUser(userData);
+            if (userData.role === 'admin' && window.location.pathname === '/') {
+                navigate('/admin');
+            }
         }
-    }, []);
+    }, [navigate]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');

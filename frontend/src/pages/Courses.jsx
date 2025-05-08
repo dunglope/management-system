@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { getCourses } from '../services/api';
+import api from '../services/api';
 
 const Courses = () => {
     const [courses, setCourses] = useState([]);
@@ -9,7 +9,7 @@ const Courses = () => {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const response = await getCourses();
+                const response = await api.get('/courses');
                 setCourses(response.data);
                 setLoading(false);
             } catch (error) {
@@ -35,8 +35,10 @@ const Courses = () => {
                     {courses.map((course) => (
                         <div key={course.course_id} className="border p-4 rounded shadow">
                             <h2 className="text-xl font-semibold">{course.course_name}</h2>
-                            <p>{course.description}</p>
+                            <p><strong>Code:</strong> {course.course_code}</p>
                             <p><strong>Credits:</strong> {course.credits}</p>
+                            <p><strong>Type:</strong> {course.course_type}</p>
+                            <p><strong>Mandatory:</strong> {course.is_mandatory ? 'Yes' : 'No'}</p>
                         </div>
                     ))}
                 </div>

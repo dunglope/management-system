@@ -12,7 +12,7 @@ const Tuition = () => {
 
     const fetchTuitions = async () => {
         try {
-            const response = await api.get(`/tuition student/${user.id}`);
+            const response = await api.get(`/tuitions/student/${user.id}`);
             setTuitions(response.data);
         } catch (err) {
             toast.error('Failed to fetch tuition records');
@@ -21,7 +21,7 @@ const Tuition = () => {
 
     const handlePay = async (tuition) => {
         try {
-            await api.put(`/tuition/pay/${user.id}/${tuition.semester}/${tuition.academic_year}`);
+            await api.put(`/tuitions/pay/${user.id}/${tuition.semester}/${tuition.academic_year}`);
             toast.success('Tuition marked as paid');
             fetchTuitions();
         } catch (err) {
