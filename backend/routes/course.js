@@ -4,11 +4,9 @@ const courseController = require('../controllers/courseController');
 const { authenticate, authorize } = require('../middleware/auth');
 
 router.post('/', authenticate, authorize(['admin']), courseController.createCourse);
-router.get('/', authenticate, courseController.getAllCourses);
-router.get('/:id', authenticate, courseController.getCourseById);
+router.get('/', authenticate, authorize(['admin', 'lecturer', 'student']), courseController.getAllCourses);
 router.put('/:id', authenticate, authorize(['admin']), courseController.updateCourse);
 router.delete('/:id', authenticate, authorize(['admin']), courseController.deleteCourse);
-router.post('/:id/prerequisites', authenticate, authorize(['admin']), courseController.addPrerequisite);
-router.post('/classes', authenticate, authorize(['admin']), courseController.createClass);
+router.get('/next-id', authenticate, authorize(['admin']), courseController.getNextCourseId);
 
 module.exports = router;

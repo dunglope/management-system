@@ -1,80 +1,70 @@
 const courseService = require('../services/courseService');
-const pool = require('../config/db');
 
-const createCourse = async (req, res, next) => {
+const createCourse = async (req, res) => {
     try {
-        const { course_code, course_name, credits, is_mandatory, course_type, curriculum_id } = req.body;
-        const course = await courseService.createCourse({ course_code, course_name, credits, is_mandatory, course_type, curriculum_id });
+        const course = await courseService.createCourse(req.body);
         res.status(201).json(course);
-    } catch (error) {
-        next(error);
+    } catch (err) {
+        if (err.message === 'Curriculum not found' || 
+            err.message.includes('already exists') || 
+            err.message.includes('required') || 
+            err.message.includes('Invalid course type')) {
+            res.status(400).json({ message: err.message });
+        } else {
+            res.status(500).json({ message: err.message });
+        }
     }
 };
 
-const getAllCourses = async (req, res, next) => {
+const getAllCourses = async (req, res) => {
     try {
-        const query = 'SELECT course_code, course_name, credits, is_mandatory, course_type, curriculum_id FROM monhoc';
-        const result = await pool.query(query);
-        res.status(200).json(result.rows);
-    } catch (error) {
-        console.error('Error fetching courses:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        const courses = await courseService.getAllCourses();
+        res.json(courses);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 };
 
-const getCourseById = async (req, res, next) => {
-    try {
-        const course = await courseService.getCourseById(req.params.id);
-        res.json(course);
-    } catch (error) {
-        next(error);
-    }
-};
-
-const updateCourse = async (req, res, next) => {
+const updateCourse = async (req, res) => {
     try {
         const course = await courseService.updateCourse(req.params.id, req.body);
         res.json(course);
-    } catch (error) {
-        next(error);
+    } catch (err) {
+        if (err.message === 'Course not found') {
+            res.status(404).json({ message: err.message });
+        } else if (err.message === 'Curriculum not found' || 
+                   err.message.includes('already exists') || 
+                   err.message.includes('required') || 
+                   err.message.includes('Invalid course type')) {
+            res.status(400).json({ message: err.message });
+        } else {
+            res.status(500).json({ message: err.message });
+        }
     }
 };
 
-const deleteCourse = async (req, res, next) => {
+const deleteCourse = async (req, res) => {
     try {
         await courseService.deleteCourse(req.params.id);
         res.status(204).send();
-    } catch (error) {
-        next(error);
+    } catch (err) {
+        res.status(err.message === 'Course not found' ? 404 : 500).json({ message: err.message });
     }
 };
 
-const addPrerequisite = async (req, res, next) => {
+const getNextCourseId = async (req, res) => {
     try {
-        const { prerequisite_id } = req.body;
-        await courseService.addPrerequisite(req.params.id, prerequisite_id);
-        res.status(201).json({ message: 'Prerequisite added' });
-    } catch (error) {
-        next(error);
-    }
-};
-
-const createClass = async (req, res, next) => {
-    try {
-        const { course_id, semester, academic_year, lecturer_id, max_SinhVien } = req.body;
-        const classData = await courseService.createClass({ course_id, semester, academic_year, lecturer_id, max_SinhVien });
-        res.status(201).json(classData);
-    } catch (error) {
-        next(error);
+        const nextId = await courseService.getNextCourseId();
+        res.json({ nextId });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 };
 
 module.exports = {
     createCourse,
     getAllCourses,
-    getCourseById,
     updateCourse,
     deleteCourse,
-    addPrerequisite,
-    createClass
+    getNextCourseId
 };
