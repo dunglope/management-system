@@ -4,7 +4,7 @@ import { NavLink } from 'react-router-dom';
 const Sidebar = ({ user, handleLogout }) => {
     const links = [
         { path: '/admin', label: 'Admin Dashboard', roles: ['admin'] },
-        { path: '/', label: 'Dashboard', roles: ['admin', 'lecturer', 'student'] },
+        { path: '/dashboard', label: 'Dashboard', roles: ['admin', 'lecturer', 'student'] },
         { path: '/users', label: 'User Management', roles: ['admin'] },
         { path: '/curriculums', label: 'Curriculums', roles: ['admin', 'lecturer', 'student'] },
         { path: '/courses', label: 'Courses', roles: ['admin', 'lecturer', 'student'] },

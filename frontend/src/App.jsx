@@ -1,28 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from './components/Sidebar';
 
 const App = () => {
     const [user, setUser] = useState(null);
-    const navigate = useNavigate();
 
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
             const userData = JSON.parse(atob(token.split('.')[1]));
             setUser(userData);
-            if (userData.role === 'admin' && window.location.pathname === '/') {
-                navigate('/admin');
-            }
         }
-    }, [navigate]);
+    }, []);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
         setUser(null);
-        navigate('/login');
+        window.location.href = '/login';
     };
 
     return (

@@ -13,7 +13,8 @@ const Login = () => {
         try {
             const response = await api.post('/users/login', { username, password });
             localStorage.setItem('token', response.data.token);
-            navigate('/');
+            const user = JSON.parse(atob(response.data.token.split('.')[1]));
+            navigate(user.role === 'admin' ? '/admin' : '/dashboard');
         } catch (err) {
             setError('Invalid credentials');
         }

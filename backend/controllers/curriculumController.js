@@ -1,55 +1,44 @@
 const curriculumService = require('../services/curriculumService');
 
-const createCurriculum = async (req, res, next) => {
+const createCurriculum = async (req, res) => {
     try {
-        const { program_name, description, academic_year } = req.body;
-        const curriculum = await curriculumService.createCurriculum({ program_name, description, academic_year });
+        const curriculum = await curriculumService.createCurriculum(req.body);
         res.status(201).json(curriculum);
-    } catch (error) {
-        next(error);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 };
 
-const getAllCurriculums = async (req, res, next) => {
+const getAllCurriculums = async (req, res) => {
     try {
         const curriculums = await curriculumService.getAllCurriculums();
         res.json(curriculums);
-    } catch (error) {
-        next(error);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 };
 
-const getCurriculumById = async (req, res, next) => {
-    try {
-        const curriculum = await curriculumService.getCurriculumById(req.params.id);
-        res.json(curriculum);
-    } catch (error) {
-        next(error);
-    }
-};
-
-const updateCurriculum = async (req, res, next) => {
+const updateCurriculum = async (req, res) => {
     try {
         const curriculum = await curriculumService.updateCurriculum(req.params.id, req.body);
         res.json(curriculum);
-    } catch (error) {
-        next(error);
+    } catch (err) {
+        res.status(err.message === 'Curriculum not found' ? 404 : 500).json({ message: err.message });
     }
 };
 
-const deleteCurriculum = async (req, res, next) => {
+const deleteCurriculum = async (req, res) => {
     try {
         await curriculumService.deleteCurriculum(req.params.id);
         res.status(204).send();
-    } catch (error) {
-        next(error);
+    } catch (err) {
+        res.status(err.message === 'Curriculum not found' ? 404 : 500).json({ message: err.message });
     }
 };
 
 module.exports = {
     createCurriculum,
     getAllCurriculums,
-    getCurriculumById,
     updateCurriculum,
     deleteCurriculum
 };
