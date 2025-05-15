@@ -66,7 +66,6 @@ Create a ```.env``` file in the ```/backend``` directory:
 PORT=5000
 DATABASE_URL=postgresql://user:password@localhost:5432/education_system
 JWT_SECRET=your_jwt_secret
-GOOGLE_AUTH_SECRET=your_google_authenticator_secret
 ```
 
 #### Install Dependencies and Start
@@ -85,6 +84,7 @@ npm start
 
 ## Database Setup
 
+Please refer to create DB file to continue
 
 ## Workflow Example
 #### Student registers for a course:
